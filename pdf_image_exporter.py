@@ -4,7 +4,8 @@ from PIL import Image, ImageFile
 #import hashlib
 from io import BytesIO
 import imagehash
-import sys,pathlib,os
+import sys,os
+from pathlib import Path
 
 
 HASHES = set()
@@ -67,14 +68,13 @@ def extract_images(pdf_file, save_dir):                           #main function
                 count += 1
             os.remove('temp_file.png')
 
-pdf_file = sys.argv[1]                          #pdf file name
+pdf_file = Path(sys.argv[1])                          #pdf file name
 
-save_dir = pathlib.Path(pdf_file.split('.')[0] + '_export')     #directiry for the resulting images, 'pdf file name' + _export
-print(save_dir)
+save_dir = Path(pdf_file.stem + '_export')     #directiry for the resulting images, 'pdf file name' + _export
+print('Saving images in', save_dir)
 try:
     save_dir.mkdir(exist_ok=True)
 except:
     print('Can\'t create dir', save_dir)
 
-extract_images(sys.argv[1], str(save_dir))      #do the thing
-
+extract_images(pdf_file, str(save_dir))      #do the thing
