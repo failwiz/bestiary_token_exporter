@@ -1,7 +1,5 @@
 from pypdf import PdfReader
 from PIL import Image, ImageFile
-#ImageFile.LOAD_TRUNCATED_IMAGES = True
-#import hashlib
 from io import BytesIO
 import imagehash
 import sys,os
@@ -9,14 +7,6 @@ from pathlib import Path
 
 
 HASHES = set()
-
-
-#def make_hash(file):                #make hash using hashlib
-#    with open(file, 'rb') as f:
-#        image_hash = hashlib.sha1()     #hashing
-#        while chunk := f.read():
-#            image_hash.update(chunk)
-#    return image_hash.hexdigest()       #returning hash string
 
 def make_hash(file):                                        #hash using imagehash module; less duplicates due to crop
     image_hash = imagehash.average_hash(Image.open(file))
@@ -70,8 +60,9 @@ def extract_images(pdf_file, save_dir):                           #main function
 
 pdf_file = Path(sys.argv[1])                          #pdf file name
 
-save_dir = Path(pdf_file.stem + '_export')     #directiry for the resulting images, 'pdf file name' + _export
+save_dir = Path(pdf_file.stem + '_export')     #directory for the resulting images, 'pdf file name' + _export
 print('Saving images in', save_dir)
+
 try:
     save_dir.mkdir(exist_ok=True)
 except:
