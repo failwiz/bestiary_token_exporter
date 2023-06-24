@@ -8,5 +8,5 @@ Currently:
  - saves the non-duplicate images to the _export folder
  - some duplicates still slip past, if they are technically gifferent (due to *initial* cropping)
 
-#Dependencies:
+# Dependencies:
 - imagehash, pypdf, PIL
