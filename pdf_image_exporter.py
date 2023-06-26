@@ -23,27 +23,29 @@ def check_hash(hash_string):
     if hash_string in HASHES:
         return True
     else:
-        HASHES.add(hash_string) #if not in it, add and return False
+#if hash is not a duplicate, add hash and return False
+        HASHES.add(hash_string)
         return False
 
 def save_temp_file(data, extension):
-    '''Save temp file.
+    '''Save image to a temp file.
     '''
     temp = open('temp_file.' + extension, "wb")
     temp.write(data)
     temp.close()
 
 def convert_image_to_png(name, extension):
-    '''Convertation to png.
+    '''Convert the image to png.
     '''
     image = Image.open(name + '.' + extension)
     image.save(name + '.png')
     image.close()
 
 def crop_image(filename, extension):
-    '''Crop image.
+    '''Crop the image.
     '''
-    if extension != 'png': #if it's not png it will be
+#if it's not PNG already, it will be
+    if extension != 'png':
         convert_image_to_png(filename, extension)
         os.remove(filename + '.' + extension)
         extension = 'png'
@@ -61,11 +63,14 @@ def extract_images(file, result_dir):
     for page_num,page in enumerate(reader.pages):
         for image_file_object in page.images:
             full_filename = str(page_num) + '_' + str(count) + image_file_object.name
-            filename,extension = full_filename.split('.')       #splitting filename and extension
-            save_temp_file(image_file_object.data, extension)   #temp file
-            crop_image('temp_file', extension)                  #crop + convert
-            #checking for duplicate
-            #if so, skip the images
+#splitting filename and extension
+            filename,extension = full_filename.split('.')
+#temp file
+            save_temp_file(image_file_object.data, extension)
+#crop + convert
+            crop_image('temp_file', extension)
+#checking for duplicate
+#if so, skip the images
             if check_hash(make_hash('temp_file.png')):
                 pass
             else:
@@ -79,7 +84,7 @@ def extract_images(file, result_dir):
 #pdf file name
 pdf_file = Path(sys.argv[1])
 #directory for images, 'pdf file name' + _export
-save_dir = Path(pdf_file.stem + '_export')
+save_dir = Path(str(pdf_file.parent / pdf_file.stem) + '_export')
 print('Saving images in', save_dir)
 
 try:
