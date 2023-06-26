@@ -1,5 +1,8 @@
 '''
 A pdf image parser.
+Usage:
+python3 pdf_image_exporter.py /path/to/pdf_file.pdf
+Exports images from a pdf file to a directory. Duplicates are discarded.
 '''
 
 import sys
@@ -82,9 +85,15 @@ def extract_images(file, result_dir):
             os.remove('temp_file.png')
 
 #pdf file name
-pdf_file = Path(sys.argv[1])
+try:
+    pdf_file = Path(sys.argv[1])
+except IndexError:
+    print('No pdf file!')
+    print(__doc__)
+    exit()
 #directory for images, 'pdf file name' + _export
 save_dir = Path(str(pdf_file.parent / pdf_file.stem) + '_export')
+
 print('Saving images in', save_dir)
 
 try:
