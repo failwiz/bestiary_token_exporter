@@ -1,7 +1,8 @@
 '''
 A pdf image parser.
+
 Usage:
-python3 pdf_image_exporter.py /path/to/pdf_file.pdf
+    python3 pdf_image_exporter.py /path/to/pdf_file.pdf
 Exports images from a pdf file to a directory. Duplicates are discarded.
 '''
 
@@ -14,14 +15,12 @@ import imagehash
 HASHES = set()
 
 def make_hash(file):
-    '''Hash using imagehash module.
-    '''
+    '''Hash using imagehash module.'''
     image_hash = imagehash.average_hash(Image.open(file))
     return image_hash
 
 def check_hash(hash_string):
-    '''Checking hash against the HASHES set.
-    '''
+    '''Checking hash against the HASHES set.'''
     if hash_string in HASHES:
         return True
 #if hash is not a duplicate, add hash and return False
@@ -29,20 +28,17 @@ def check_hash(hash_string):
     return False
 
 def save_temp_file(data, extension):
-    '''Save image to a temp file.
-    '''
+    '''Save image to a temp file.'''
     with open('temp_file.' + extension, "wb") as temp:
         temp.write(data)
 
 def convert_image_to_png(name, extension):
-    '''Convert the image to png.
-    '''
+    '''Convert the image to png.'''
     with Image.open(name + '.' + extension) as image:
         image.save(name + '.png')
 
 def crop_image(filename, extension):
-    '''Crop the image.
-    '''
+    '''Crop the image.'''
 #if it's not PNG already, it will be
     if extension != 'png':
         convert_image_to_png(filename, extension)
@@ -56,8 +52,7 @@ def crop_image(filename, extension):
         cropped.save(file)
 
 def extract_images(file, result_dir):
-    '''Extracting images from a pdf file.
-    '''
+    '''Extracting images from a pdf file.'''
     count = 0
     reader = PdfReader(file)
     for page_num,page in enumerate(reader.pages):
