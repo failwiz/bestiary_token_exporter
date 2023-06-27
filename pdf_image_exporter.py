@@ -6,7 +6,6 @@ Exports images from a pdf file to a directory. Duplicates are discarded.
 '''
 
 import sys
-import os
 from pathlib import Path
 from pypdf import PdfReader
 from PIL import Image
@@ -25,24 +24,21 @@ def check_hash(hash_string):
     '''
     if hash_string in HASHES:
         return True
-    else:
 #if hash is not a duplicate, add hash and return False
-        HASHES.add(hash_string)
-        return False
+    HASHES.add(hash_string)
+    return False
 
 def save_temp_file(data, extension):
     '''Save image to a temp file.
     '''
-    temp = open('temp_file.' + extension, "wb")
-    temp.write(data)
-    temp.close()
+    with open('temp_file.' + extension, "wb") as temp:
+        temp.write(data)
 
 def convert_image_to_png(name, extension):
     '''Convert the image to png.
     '''
-    image = Image.open(name + '.' + extension)
-    image.save(name + '.png')
-    image.close()
+    with Image.open(name + '.' + extension) as image:
+        image.save(name + '.png')
 
 def crop_image(filename, extension):
     '''Crop the image.
@@ -50,13 +46,14 @@ def crop_image(filename, extension):
 #if it's not PNG already, it will be
     if extension != 'png':
         convert_image_to_png(filename, extension)
-        os.remove(filename + '.' + extension)
+        Path.unlink(filename + '.' + extension)
         extension = 'png'
     file = filename + '.' + extension
-    image = Image.open(file)
-    image_bounds = image.getbbox()
-    cropped = image.crop(image_bounds)
-    cropped.save(file)
+    with Image.open(file) as image:
+#crop to content
+        image_bounds = image.getbbox()
+        cropped = image.crop(image_bounds)
+        cropped.save(file)
 
 def extract_images(file, result_dir):
     '''Extracting images from a pdf file.
@@ -72,17 +69,16 @@ def extract_images(file, result_dir):
             save_temp_file(image_file_object.data, extension)
 #crop + convert
             crop_image('temp_file', extension)
-#checking for duplicate
-#if so, skip the images
+#checking for duplicates
+#if so, skip the image
             if check_hash(make_hash('temp_file.png')):
                 pass
             else:
-                #save the resulting non-duplicate png file
-                final_image = Image.open('temp_file.png')
-                final_image.save(result_dir + '/' + filename + '.' + 'png')
-                final_image.close()
+#save the resulting non-duplicate png file
+                with Image.open('temp_file.png') as final_image:
+                    final_image.save(result_dir + '/' + filename + '.' + 'png')
                 count += 1
-            os.remove('temp_file.png')
+            Path.unlink('temp_file.png')
 
 #pdf file name
 try:
@@ -103,3 +99,4 @@ except FileNotFoundError:
 
 #Calling the main function
 extract_images(pdf_file, str(save_dir))
+print(f'Saved {len(HASHES)} unique images.')
