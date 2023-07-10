@@ -1,17 +1,17 @@
-'''
-A pdf image parser.
+"""A pdf image parser.
 
 Usage:
     python3 pdf_image_exporter.py /path/to/pdf_file.pdf
 Exports images from a pdf file to a directory. Duplicates are discarded.
-'''
+"""
 
-import sys
 import io
+import sys
 from pathlib import Path
-from pypdf import PdfReader
-from PIL import Image
+
 import imagehash
+from PIL import Image
+from pypdf import PdfReader
 
 
 class ExportedImageFile:
@@ -32,11 +32,11 @@ class ExportedImageFile:
         self.image.save(str(path) + '/' + self.name.split('.')[0] + '.png')
 
 
-def extract_images(pdf_file: Path) -> dict:
+def extract_images(pdf_file: Path) -> dict[str: ExportedImageFile]:
     """Extract images from"""
-    images: dict = {}
+    images: dict[str: ExportedImageFile] = {}
     count: int = 0
-    reader = PdfReader(pdf_file)
+    reader: PdfReader = PdfReader(pdf_file)
     for page_num, page in enumerate(reader.pages):
         for image_file_object in page.images:
             temp_name: str = (str(page_num) + '_' + str(count)
@@ -49,13 +49,13 @@ def extract_images(pdf_file: Path) -> dict:
 
 def main():
     try:
-        pdf_file = Path(sys.argv[1])
+        pdf_file: Path = Path(sys.argv[1])
     except IndexError:
         print('No pdf file!')
         print(__doc__)
-        exit()
+        sys.exit()
     # directory for images, 'pdf file name' + _export
-    save_dir = Path(str(pdf_file.parent / pdf_file.stem) + '_export')
+    save_dir: Path = Path(str(pdf_file.parent / pdf_file.stem) + '_export')
     print('Saving images in', save_dir)
     try:
         save_dir.mkdir(exist_ok=True)
