@@ -33,7 +33,7 @@ class ExportedImageFile:
 
 
 def extract_images(pdf_file: Path) -> dict[str: ExportedImageFile]:
-    """Extract images from"""
+    """Extract images from pdf file."""
     images: dict[str: ExportedImageFile] = {}
     count: int = 0
     reader: PdfReader = PdfReader(pdf_file)
@@ -48,6 +48,7 @@ def extract_images(pdf_file: Path) -> dict[str: ExportedImageFile]:
 
 
 def main():
+    """Main function."""
     try:
         pdf_file: Path = Path(sys.argv[1])
     except IndexError:
