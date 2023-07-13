@@ -47,7 +47,7 @@ def extract_images(pdf_file: Path) -> dict[str: ExportedImageFile]:
     return images
 
 
-def main():
+def main() -> None:
     """Main function."""
     try:
         pdf_file: Path = Path(sys.argv[1])
