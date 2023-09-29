@@ -29,8 +29,8 @@ class ExportedImageFile:
 
     def save_image(self, path: Path) -> None:
         """Save image to a file."""
-        self.image.convert('RGB').save(
-            str(path) + '/' + self.name.split('.')[0] + '.png'
+        self.image.save(
+            str(path) + '/' + self.name.split('.')[0] + '.webp'
         )
 
 
