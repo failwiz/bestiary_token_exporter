@@ -8,6 +8,7 @@ Exports images from a pdf file to a directory. Duplicates are discarded.
 import io
 import sys
 from pathlib import Path
+from typing import Optional
 
 import imagehash
 from PIL import Image
@@ -17,15 +18,15 @@ from pypdf import PdfReader
 class ExportedImageFile:
     """Image, exported from pdf file."""
 
-    def __init__(self, image_data: Image.Image, name: str) -> None:
+    def __init__(self, image_data: bytes, name: str) -> None:
         self.name = name
         image: Image.Image = Image.open(io.BytesIO(image_data))
-        bounds: tuple(int, int, int, int) = image.getbbox()
+        bounds: Optional[tuple[int, int, int, int]] = image.getbbox()
         self.image = image.crop(bounds)
 
     def get_hash(self) -> str:
         """Get the hash of the image."""
-        return imagehash.average_hash(self.image)
+        return str(imagehash.average_hash(self.image))
 
     def save_image(self, path: Path) -> None:
         """Save image to a file."""
@@ -34,9 +35,9 @@ class ExportedImageFile:
         )
 
 
-def extract_images(pdf_file: Path) -> dict[str: ExportedImageFile]:
+def extract_images(pdf_file: Path) -> dict[str, ExportedImageFile]:
     """Extract images from pdf file."""
-    images: dict[str: ExportedImageFile] = {}
+    images: dict[str, ExportedImageFile] = {}
     count: int = 0
     reader: PdfReader = PdfReader(pdf_file)
     for page_num, page in enumerate(reader.pages):
@@ -65,7 +66,7 @@ def main() -> None:
     except FileNotFoundError:
         print('Can\'t create dir', save_dir)
 
-    exported_images: dict[str: ExportedImageFile] = extract_images(pdf_file)
+    exported_images: dict[str, ExportedImageFile] = extract_images(pdf_file)
 
     for image in exported_images.values():
         image.save_image(save_dir)
