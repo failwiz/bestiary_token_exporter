@@ -16,72 +16,41 @@ import imagehash
 from PIL import Image
 from pypdf import PdfReader
 
+HASH_SIZE = 6
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
 
 
-class ExportedImageFile:
-    """Image, exported from pdf file."""
-
-    def __init__(self, image_data: bytes, name: str) -> None:
-        self.name = name + '.webp'
-        image = Image.open(io.BytesIO(image_data))
-        bounds = image.getbbox()
-        self.image = image.crop(bounds)
-        logger.debug(f'Found image: {self.name}')
-
-    async def async_init(self):
-        return self
-
-    @property
-    def hash(self):
-        return str(imagehash.average_hash(self.image))
-
-    def __await__(self):
-        return self.async_init().__await__()
-
-    def __str__(self) -> str:
-        return f'{self.name}'
-
-    def save_image(self, path: Path) -> None:
-        """Save image to a file."""
-
-        self.image.save(
-            str(path) + '/' + self.name
-        )
-        logger.debug(f'Image saved: {self.name}')
-
-
-def blocking_get_image(pdf_file: Path):
+def generator_get_image(pdf_file: Path):
     """Extract images from pdf file."""
 
-    count: int = 0
     reader: PdfReader = PdfReader(pdf_file)
     for page in reader.pages:
-        for image in page.images:
-            count += 1
-            yield ExportedImageFile(image.data, str(count))
-    logger.debug(f'Found {count-1} images')
+        for count, image in enumerate(page.images):
+            with Image.open(io.BytesIO(image.data)) as ex_image:
+                filename = f'{str(page.page_number)}_{str(count)}.webp'
+                yield ex_image, filename
 
 
 async def save_images(pdf_file, save_dir):
     """Save extracted images to folder."""
 
     hashes = set()
-    coro = asyncio.to_thread(
-        blocking_get_image,
-        pdf_file
-    )
-    saving_tasks = set()
-    for image in await asyncio.create_task(coro):
-        if image.hash not in hashes:
-            save_coro = asyncio.to_thread(image.save_image, save_dir)
-            saving_tasks.add(asyncio.create_task(save_coro))
-            hashes.add(image.hash)
+    saving_tasks = []
+    coro_get_image = asyncio.to_thread(generator_get_image, pdf_file)
+    task_get_image = asyncio.create_task(coro_get_image)
+    for image, filename in await task_get_image:
+        im_hash = str(imagehash.average_hash(image, HASH_SIZE))
+        if im_hash not in hashes:
+            hashes.add(im_hash)
+            save_coro = asyncio.to_thread(image.save, f'{save_dir}/{filename}')
+            save_task = asyncio.create_task(save_coro)
+            saving_tasks.append(save_task)
         else:
-            logger.debug(f'{image.name} is a duplicate')
+            logger.debug(f'{filename} is a duplicate')
     await asyncio.gather(*saving_tasks)
+    logger.debug(f'Saved {len(saving_tasks)} images')
 
 
 async def main():
