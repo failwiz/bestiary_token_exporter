@@ -21,6 +21,7 @@ Currently:
  - gets *all* the images in pdf file
  - while getting images, crops to content and converts them to webp (if they are not already)
  - checks if the same image was pulled already, using hash
+    * it is possible to tune duplicate detection with **HASH_SIZE** constant (less is more strict, more leaves more dupes)
  - saves the non-duplicate images to the _export folder
  - some duplicates still slip past, if they are technically different (due to *initial* cropping)
  - filenames just numbered in the order of pulling; getting text from pdf is too much of a pain to bother trying to implement it

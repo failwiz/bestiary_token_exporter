@@ -16,6 +16,7 @@ import imagehash
 from PIL import Image
 from pypdf import PdfReader
 
+HASH_SIZE = 6
 
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
@@ -40,7 +41,7 @@ async def save_images(pdf_file, save_dir):
     coro_get_image = asyncio.to_thread(generator_get_image, pdf_file)
     task_get_image = asyncio.create_task(coro_get_image)
     for image, filename in await task_get_image:
-        im_hash = str(imagehash.average_hash(image, 6))
+        im_hash = str(imagehash.average_hash(image, HASH_SIZE))
         if im_hash not in hashes:
             hashes.add(im_hash)
             save_coro = asyncio.to_thread(image.save, f'{save_dir}/{filename}')
